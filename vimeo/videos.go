@@ -645,6 +645,23 @@ func (s *VideosService) GetTag(vid int, t string, opt ...CallOption) (*Tag, *Res
 	return tag, resp, err
 }
 
+// AssignTagList method adds multiple tags to a video.
+//
+// Vimeo API docs: https://developer.vimeo.com/api/reference/videos#add_video_tags
+func (s *VideosService) AssignTagList(vid int, tags []string) (*Response, error) {
+	u := fmt.Sprintf("videos/%d/tags", vid)
+	tagsReq := make([]Tag, len(tags))
+	for i, v := range tags {
+		tagsReq[i] = Tag{Name: v}
+	}
+	req, err := s.client.NewRequest("PUT", u, tagsReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.client.Do(req, nil)
+}
+
 // AssignTag method adds a single tag to the specified video.
 //
 // Vimeo API docs: https://developer.vimeo.com/api/reference/videos#add_video_tag

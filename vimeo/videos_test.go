@@ -3,8 +3,10 @@ package vimeo
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -766,6 +768,26 @@ func TestVideosService_GetTag(t *testing.T) {
 	want := &Tag{Name: "Test"}
 	if !reflect.DeepEqual(tag, want) {
 		t.Errorf("Videos.GetTag returned %+v, want %+v", tag, want)
+	}
+}
+
+func TestVideosService_AssignTagList(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/videos/1/tags", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+
+		want := `[{"name":"1"},{"name":"2"}]`
+		body, _ := ioutil.ReadAll(r.Body)
+		if body := strings.TrimSpace(string(body)); body != want {
+			t.Errorf("NewRequest Body is %v, want %v", body, want)
+		}
+	})
+
+	_, err := client.Videos.AssignTagList(1, []string{"1", "2"})
+	if err != nil {
+		t.Errorf("Videos.AssignTagList returned unexpected error: %v", err)
 	}
 }
 
